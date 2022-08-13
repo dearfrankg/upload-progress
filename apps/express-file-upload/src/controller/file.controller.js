@@ -33,7 +33,7 @@ const getListFiles = (req, res) => {
 
   fs.readdir(directoryPath, function (err, files) {
     if (err) {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Unable to scan files!",
       });
     }
@@ -51,18 +51,18 @@ const getListFiles = (req, res) => {
   });
 };
 
-const download = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
+// const download = (req, res) => {
+//   const fileName = req.params.name;
+//   const directoryPath = __basedir + "/resources/static/assets/uploads/";
 
-  res.download(directoryPath + fileName, fileName, (err) => {
-    if (err) {
-      res.status(500).send({
-        message: "Could not download the file. " + err,
-      });
-    }
-  });
-};
+//   res.download(directoryPath + fileName, fileName, (err) => {
+//     if (err) {
+//       res.status(500).send({
+//         message: "Could not download the file. " + err,
+//       });
+//     }
+//   });
+// };
 
 const remove = (req, res) => {
   const fileName = req.params.name;
@@ -70,7 +70,7 @@ const remove = (req, res) => {
 
   fs.unlink(directoryPath + fileName, (err) => {
     if (err) {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Could not delete the file. " + err,
       });
     }
@@ -81,27 +81,27 @@ const remove = (req, res) => {
   });
 };
 
-const removeSync = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
+// const removeSync = (req, res) => {
+//   const fileName = req.params.name;
+//   const directoryPath = __basedir + "/resources/static/assets/uploads/";
 
-  try {
-    fs.unlinkSync(directoryPath + fileName);
+//   try {
+//     fs.unlinkSync(directoryPath + fileName);
 
-    res.status(200).send({
-      message: "File is deleted.",
-    });
-  } catch (err) {
-    res.status(500).send({
-      message: "Could not delete the file. " + err,
-    });
-  }
-};
+//     res.status(200).send({
+//       message: "File is deleted.",
+//     });
+//   } catch (err) {
+//     res.status(500).send({
+//       message: "Could not delete the file. " + err,
+//     });
+//   }
+// };
 
 module.exports = {
   upload,
   getListFiles,
-  download,
+  // download,
   remove,
-  removeSync,
+  // removeSync,
 };
