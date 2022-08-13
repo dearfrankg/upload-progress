@@ -65,8 +65,8 @@ const UploadFiles = () => {
       setMessage([]);
     },
 
-    deleteFile: (name) => {
-      FileService.delete(name);
+    deleteFile: async (name) => {
+      await FileService.delete(name);
       FileService.getFiles().then((response) => {
         setFileInfos(response.data);
       });
