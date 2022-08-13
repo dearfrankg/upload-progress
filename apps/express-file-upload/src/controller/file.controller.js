@@ -88,11 +88,11 @@ const removeSync = (req, res) => {
   try {
     fs.unlinkSync(directoryPath + fileName);
 
-    return res.sendStatus(200).send({
+    res.sendStatus(200).send({
       message: "File is deleted.",
     });
   } catch (err) {
-    return res.sendStatus(500).send({
+    res.sendStatus(500).send({
       message: "Could not delete the file. " + err,
     });
   }
