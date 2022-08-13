@@ -1,72 +1,82 @@
 import React, { useState, useEffect, useRef } from "react";
-import UploadService from "../services/FileUploadService";
+import FileService from "../services/file-service";
 
+const styles = {
+  box: { border: "1px solid red" },
+  flex: { display: "flex" },
+  flexItem: (ratio) => ({ flex: ratio }),
+};
 const UploadFiles = () => {
   const [selectedFiles, setSelectedFiles] = useState(undefined);
   const [progressInfos, setProgressInfos] = useState({ val: [] });
   const [message, setMessage] = useState([]);
   const [fileInfos, setFileInfos] = useState([]);
-  const progressInfosRef = useRef(null)
+  const progressInfosRef = useRef(null);
 
   useEffect(() => {
-    UploadService.getFiles().then((response) => {
+    FileService.getFiles().then((response) => {
       setFileInfos(response.data);
     });
   }, []);
 
-  const selectFiles = (event) => {
-    setSelectedFiles(event.target.files);
-    setProgressInfos({ val: [] });
-  };
-
   const upload = (idx, file) => {
     let _progressInfos = [...progressInfosRef.current.val];
-    return UploadService.upload(file, (event) => {
-      _progressInfos[idx].percentage = Math.round(
-        (100 * event.loaded) / event.total
-      );
+    return FileService.upload(file, (event) => {
+      _progressInfos[idx].percentage = Math.round((100 * event.loaded) / event.total);
       setProgressInfos({ val: _progressInfos });
     })
       .then(() => {
-        setMessage((prevMessage) => ([
+        setMessage((prevMessage) => [
           ...prevMessage,
           "Uploaded the file successfully: " + file.name,
-        ]));
+        ]);
       })
       .catch(() => {
         _progressInfos[idx].percentage = 0;
         setProgressInfos({ val: _progressInfos });
 
-        setMessage((prevMessage) => ([
-          ...prevMessage,
-          "Could not upload the file: " + file.name,
-        ]));
+        setMessage((prevMessage) => [...prevMessage, "Could not upload the file: " + file.name]);
       });
   };
 
-  const uploadFiles = () => {
-    const files = Array.from(selectedFiles);
+  const handle = {
+    selectFiles: (event) => {
+      setSelectedFiles(event.target.files);
+      setProgressInfos({ val: [] });
+    },
 
-    let _progressInfos = files.map(file => ({ percentage: 0, fileName: file.name }));
+    uploadFiles: () => {
+      const files = Array.from(selectedFiles);
 
-    progressInfosRef.current = {
-      val: _progressInfos,
-    }
+      let _progressInfos = files.map((file) => ({ percentage: 0, fileName: file.name }));
 
-    const uploadPromises = files.map((file, i) => upload(i, file));
+      progressInfosRef.current = {
+        val: _progressInfos,
+      };
 
-    Promise.all(uploadPromises)
-      .then(() => UploadService.getFiles())
-      .then((files) => {
-        setFileInfos(files.data);
+      const uploadPromises = files.map((file, i) => upload(i, file));
+
+      Promise.all(uploadPromises)
+        .then(() => FileService.getFiles())
+        .then((files) => {
+          setFileInfos(files.data);
+        });
+
+      setMessage([]);
+    },
+
+    deleteFile: (name) => {
+      FileService.delete(name);
+      FileService.getFiles().then((response) => {
+        setFileInfos(response.data);
       });
-
-    setMessage([]);
+    },
   };
 
   return (
     <div>
-      {progressInfos && progressInfos.val.length > 0 &&
+      {progressInfos &&
+        progressInfos.val.length > 0 &&
         progressInfos.val.map((progressInfo, index) => (
           <div className="mb-2" key={index}>
             <span>{progressInfo.fileName}</span>
@@ -88,7 +98,7 @@ const UploadFiles = () => {
       <div className="row my-3">
         <div className="col-8">
           <label className="btn btn-default p-0">
-            <input type="file" multiple onChange={selectFiles} />
+            <input type="file" multiple onChange={handle.selectFiles} />
           </label>
         </div>
 
@@ -96,7 +106,7 @@ const UploadFiles = () => {
           <button
             className="btn btn-success btn-sm"
             disabled={!selectedFiles}
-            onClick={uploadFiles}
+            onClick={handle.uploadFiles}
           >
             Upload
           </button>
@@ -119,7 +129,14 @@ const UploadFiles = () => {
           {fileInfos &&
             fileInfos.map((file, index) => (
               <li className="list-group-item" key={index}>
-                <a href={file.url}>{file.name}</a>
+                <div style={styles.flex}>
+                  <div style={styles.flexItem(1)}>
+                    <a href={file.url}>{file.name}</a>
+                  </div>
+                  <div style={{ ...styles.flexItem(1), textAlign: "right" }}>
+                    <button onClick={() => handle.deleteFile(file.name)}>x</button>
+                  </div>
+                </div>
               </li>
             ))}
         </ul>

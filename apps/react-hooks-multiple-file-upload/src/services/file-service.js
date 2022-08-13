@@ -17,9 +17,14 @@ const getFiles = () => {
   return http.get("/files");
 };
 
-const FileUploadService = {
-  upload,
-  getFiles,
+const deleteFile = (name) => {
+  return http.delete(`/files/${name}`);
 };
 
-export default FileUploadService; 
+const FileService = {
+  upload,
+  getFiles,
+  delete: deleteFile,
+};
+
+export default FileService;
