@@ -66,10 +66,9 @@ const UploadFiles = () => {
     },
 
     deleteFile: (name) => {
-      FileService.delete(name).then(() => {
-        FileService.getFiles().then((response) => {
-          setFileInfos(response.data);
-        });
+      FileService.delete(name);
+      FileService.getFiles().then((response) => {
+        setFileInfos(response.data);
       });
     },
   };
