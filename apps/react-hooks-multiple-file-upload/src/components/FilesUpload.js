@@ -106,59 +106,61 @@ const getHandle = ({
   sideEffect: {
     useGetFiles: () => {
       useEffect(() => {
-        FileService.getFiles().then((response) => {
-          setFileInfos(response.data);
-        });
+        FileService.getFiles().then((response) => setFileInfos(response.data));
       }, []);
     },
   },
 
-  upload: (idx, file) => {
-    let _progressInfos = [...progressInfosRef.current.val];
-    return FileService.upload(file, (event) => {
-      _progressInfos[idx].percentage = Math.round((100 * event.loaded) / event.total);
-      setProgressInfos({ val: _progressInfos });
-    })
-      .then(() => {
-        setMessage((prevMessage) => [
-          ...prevMessage,
-          "Uploaded the file successfully: " + file.name,
-        ]);
-      })
-      .catch(() => {
-        _progressInfos[idx].percentage = 0;
-        setProgressInfos({ val: _progressInfos });
+  event: {
+    selectFiles: (event) => {
+      setSelectedFiles(event.target.files);
+      setProgressInfos({ val: [] });
+    },
 
-        setMessage((prevMessage) => [...prevMessage, "Could not upload the file: " + file.name]);
+    uploadFiles: async (handle) => {
+      const files = Array.from(selectedFiles);
+
+      let _progressInfos = files.map((file) => ({ percentage: 0, fileName: file.name }));
+
+      progressInfosRef.current = {
+        val: _progressInfos,
+      };
+
+      const uploadPromises = files.map((file, i) => handle.upload(i, file));
+
+      await Promise.all(uploadPromises);
+      setFileInfos(await FileService.getFiles().then((res) => res.data));
+      setMessage([]);
+    },
+
+    deleteFile: async (name) => {
+      await FileService.delete(name);
+      FileService.getFiles().then((response) => {
+        setFileInfos(response.data);
       });
+    },
   },
 
-  selectFiles: (event) => {
-    setSelectedFiles(event.target.files);
-    setProgressInfos({ val: [] });
-  },
+  util: {
+    upload: (idx, file) => {
+      let _progressInfos = [...progressInfosRef.current.val];
+      return FileService.upload(file, (event) => {
+        _progressInfos[idx].percentage = Math.round((100 * event.loaded) / event.total);
+        setProgressInfos({ val: _progressInfos });
+      })
+        .then(() => {
+          setMessage((prevMessage) => [
+            ...prevMessage,
+            "Uploaded the file successfully: " + file.name,
+          ]);
+        })
+        .catch(() => {
+          _progressInfos[idx].percentage = 0;
+          setProgressInfos({ val: _progressInfos });
 
-  uploadFiles: async (handle) => {
-    const files = Array.from(selectedFiles);
-
-    let _progressInfos = files.map((file) => ({ percentage: 0, fileName: file.name }));
-
-    progressInfosRef.current = {
-      val: _progressInfos,
-    };
-
-    const uploadPromises = files.map((file, i) => handle.upload(i, file));
-
-    await Promise.all(uploadPromises);
-    setFileInfos(await FileService.getFiles().then((res) => res.data));
-    setMessage([]);
-  },
-
-  deleteFile: async (name) => {
-    await FileService.delete(name);
-    FileService.getFiles().then((response) => {
-      setFileInfos(response.data);
-    });
+          setMessage((prevMessage) => [...prevMessage, "Could not upload the file: " + file.name]);
+        });
+    },
   },
 });
 
@@ -188,9 +190,9 @@ const UploadFiles = () => {
   return (
     <div>
       <Progress />
-      <FileControls {...{ handle }} />
+      <FileControls {...{ handle: { ...handle.event, ...handle.util } }} />
       <Messages />
-      <FileList {...{ handle }} />
+      <FileList {...{ handle: handle.event }} />
     </div>
   );
 };
