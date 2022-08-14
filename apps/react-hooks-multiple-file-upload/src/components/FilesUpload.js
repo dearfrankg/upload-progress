@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import FileService from "../services/file-service";
 
-const styles = {
-  box: { border: "1px solid red" },
-  flex: { display: "flex" },
-  flexItem: (ratio) => ({ flex: ratio }),
-};
-
 const getHandle = ({
   selectedFiles,
   setSelectedFiles,
@@ -18,6 +12,12 @@ const getHandle = ({
   setFileInfos,
   progressInfosRef,
 }) => ({
+  styles: {
+    box: { border: "1px solid red" },
+    flex: { display: "flex" },
+    flexItem: (ratio) => ({ flex: ratio }),
+  },
+
   component: {
     Progress: () => {
       const hasProgress = progressInfos && progressInfos.val.length > 0;
@@ -81,7 +81,7 @@ const getHandle = ({
       return null;
     },
 
-    FileList: ({ handle }) => (
+    FileList: ({ handle, styles }) => (
       <div className="card">
         <div className="card-header">List of Files</div>
         <ul className="list-group list-group-flush">
@@ -192,7 +192,7 @@ const UploadFiles = () => {
       <Progress />
       <FileControls {...{ handle: { ...handle.event, ...handle.util } }} />
       <Messages />
-      <FileList {...{ handle: handle.event }} />
+      <FileList {...{ handle: handle.event, styles: handle.styles }} />
     </div>
   );
 };
