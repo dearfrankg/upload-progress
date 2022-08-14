@@ -8,8 +8,8 @@ function App() {
   return (
     <div className="container" style={{ width: "600px" }}>
       <div className="my-3">
-        <h3>bezkoder.com</h3>
-        <h4>React Hooks Multiple Files Upload</h4>
+        <h3>dearfrankg.com</h3>
+        <h4>Multi-File Upload</h4>
       </div>
 
       <FilesUpload />
