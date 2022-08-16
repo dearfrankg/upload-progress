@@ -197,13 +197,13 @@ const getHandle = ({
       dragEnter: (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setDragging(true);
+        dragging === false && setDragging(true);
       },
 
       dragLeave: (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setDragging(false);
+        dragging === true && setDragging(false);
       },
 
       drop: (e) => {
